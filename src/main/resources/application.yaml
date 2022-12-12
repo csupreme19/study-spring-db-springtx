@@ -12,4 +12,4 @@ logging:
           datasource:
             DataSourceTransactionManager: debug
         transaction:
-          interceptor: debug
+          interceptor: trace
