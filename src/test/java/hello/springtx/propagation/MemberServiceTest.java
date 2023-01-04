@@ -1,7 +1,6 @@
 package hello.springtx.propagation;
 
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,8 +35,8 @@ class MemberServiceTest {
         memberService.joinV1(username);
 
         // then
-        assertThat(memberRepository.find(username).isPresent()).isTrue();
-        assertThat(logRepository.find(username).isPresent()).isTrue();
+        assertThat(memberRepository.find(username)).isPresent();
+        assertThat(logRepository.find(username)).isPresent();
     }
 
     /**
@@ -46,17 +45,16 @@ class MemberServiceTest {
      * LogRepository @Transactional:ON Exception
      */
     @Test
-    public void outerTxOff_fail() {
+    public void outerTxOff_Fail() {
         // given
-        String username = "로그예외_outerTxOff_fail";
+        String username = "로그예외_outerTxOff_Fail";
 
         // when
-        assertThatThrownBy(()-> memberService.joinV1(username))
-                .isInstanceOf(RuntimeException.class);
+        assertThatThrownBy(()-> memberService.joinV1(username)).isInstanceOf(RuntimeException.class);
 
         // then
-        assertThat(memberRepository.find(username).isPresent()).isTrue();
-        assertThat(logRepository.find(username).isEmpty()).isTrue();
+        assertThat(memberRepository.find(username)).isPresent();
+        assertThat(logRepository.find(username)).isEmpty();
     }
 
     /**
@@ -67,13 +65,50 @@ class MemberServiceTest {
     @Test
     public void singleTx() {
         // given
-        String username = "outerTxOff_Success";
+        String username = "singleTx";
 
         // when
         memberService.joinV1(username);
 
         // then
-        assertThat(memberRepository.find(username).isPresent()).isTrue();
-        assertThat(logRepository.find(username).isPresent()).isTrue();
+        assertThat(memberRepository.find(username)).isPresent();
+        assertThat(logRepository.find(username)).isPresent();
     }
+
+    /**
+     * MemberService @Transactional:ON
+     * MemberRepository @Transactional:ON
+     * LogRepository @Transactional:ON
+     */
+    @Test
+    public void outerTxOn_Success() {
+        // given
+        String username = "outerTxOn_Success";
+
+        // when
+        memberService.joinV1(username);
+
+        // then
+        assertThat(memberRepository.find(username)).isPresent();
+        assertThat(logRepository.find(username)).isPresent();
+    }
+
+    /**
+     * MemberService @Transactional:ON
+     * MemberRepository @Transactional:ON
+     * LogRepository @Transactional:ON Exception
+     */
+    @Test
+    public void outerTxOn_Fail() {
+        // given
+        String username = "로그예외_outerTxOn_Fail";
+
+        // when
+        assertThatThrownBy(()-> memberService.joinV1(username)).isInstanceOf(RuntimeException.class);
+
+        // then
+        assertThat(memberRepository.find(username)).isEmpty();
+        assertThat(logRepository.find(username)).isEmpty();
+    }
+
 }
